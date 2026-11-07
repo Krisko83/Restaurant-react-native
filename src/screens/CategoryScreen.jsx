@@ -1,4 +1,4 @@
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, ScrollView } from "react-native";
 import CategoryItemCard from "../components/CategoryItemCard";
 import { getCategoryItems } from "../data/data";
 
@@ -14,15 +14,17 @@ export default function CategoryScreen({
     const categoryItems = getCategoryItems(categoryId);
 
     return (
-        <View style={styles.container}>
-            {categoryItems.map((item) => (
-                <CategoryItemCard
-                    key={item.id}
-                    {...item}
-                    onPress={() => navigation.navigate("Details", { item })}
-                />
-            ))}
-        </View>
+        <ScrollView>
+            <View style={styles.container}>
+                {categoryItems.map((item) => (
+                    <CategoryItemCard
+                        key={item.id}
+                        {...item}
+                        onPress={() => navigation.navigate("Details", { item })}
+                    />
+                ))}
+            </View>
+        </ScrollView>
     );
 }
 
