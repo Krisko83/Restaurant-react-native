@@ -1,12 +1,14 @@
 import { NavigationContainer } from '@react-navigation/native'; 
-import { StatusBar, Text } from 'react-native';
+import { StatusBar } from 'react-native';
+import RootNavigator from './navigation/RootNavigator.jsx';
+ 
 
 export default function App() {
   return (
     <>
       <StatusBar style="auto" />
       <NavigationContainer>
-        <Text>Open up App.js to start working on your app!</Text>
+        <RootNavigator />
       </NavigationContainer>
     </>
   );
