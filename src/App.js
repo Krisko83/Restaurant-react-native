@@ -6,7 +6,7 @@ import RootNavigator from './navigation/RootNavigator.jsx';
 export default function App() {
   return (
     <>
-      <StatusBar style="auto" />
+      <StatusBar barStyle='auto' />
       <NavigationContainer>
         <RootNavigator />
       </NavigationContainer>

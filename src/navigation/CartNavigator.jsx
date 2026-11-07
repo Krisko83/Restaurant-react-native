@@ -3,7 +3,8 @@ import CartScreen from "../screens/CartScreen.jsx";
 import CheckoutScreen from "../screens/CheckoutScreen.jsx";
 
 export default function CartNavigator() {
-        const Stack = createStackNavigator()
+        const Stack = createStackNavigator();
+        
     return (
         <Stack.Navigator>
             <Stack.Screen 

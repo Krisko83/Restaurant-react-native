@@ -46,7 +46,7 @@ export default function DetailsScreen({
                     </View>
                 </View>
             </ScrollView>
-
+            
             <View style={styles.footer}>
                 <View style={styles.priceContainer}>
                     <Text style={styles.totalLabel}>Total</Text>
@@ -66,6 +66,7 @@ export default function DetailsScreen({
                     />
                 </View>
             </View>
+
         </View>
     );
 }
@@ -128,6 +129,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         borderTopWidth: 1,
         borderTopColor: '#e0e0e0',
+        marginBottom: 35
     },
     priceContainer: {
         flexDirection: 'row',
