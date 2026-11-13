@@ -1,12 +1,14 @@
-import { View, StyleSheet, ScrollView } from "react-native";
+import { View, StyleSheet, ScrollView, Alert, RefreshControl } from "react-native";
 import CategoryItemCard from "../components/CategoryItemCard";
-import { getCategoryItems } from "../data/data";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { mealApi } from "../api";
 
 export default function CategoryScreen({
     route,
     navigation,
 }) {
+    const [meals, setMeals] = useState([]);
+    const [refreshing, setRefreshing] = useState(false);
 
     useEffect(() => {
         navigation.setOptions({
@@ -15,16 +17,38 @@ export default function CategoryScreen({
     }, [])
 
     const categoryId = route.params.categoryId;
-    const categoryItems = getCategoryItems(categoryId);
+
+    useEffect(() => {
+        mealApi.getMealsByCategory(categoryId)
+            .then(setMeals)
+            .catch(err => Alert.alert('Error', err.message))
+    }, [categoryId])
+
+    const handleRefresh = async () => {
+        setRefreshing(true);
+
+        try {
+            const data = await mealApi.getMealsByCategory(categoryId)
+            setMeals(data)
+
+        } catch (err) {
+            Alert.alert('Error', err.message)
+
+        } finally {
+            setRefreshing(false)
+        }
+    }
 
     return (
-        <ScrollView>
+        <ScrollView
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
+        >
             <View style={styles.container}>
-                {categoryItems.map((item) => (
+                {meals.map((item) => (
                     <CategoryItemCard
                         key={item.id}
                         {...item}
-                        onPress={() => navigation.navigate("Details", { item })}
+                        onPress={() => navigation.navigate("Details", { itemId: item.id })}
                     />
                 ))}
             </View>

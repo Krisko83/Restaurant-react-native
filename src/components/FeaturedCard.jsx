@@ -6,6 +6,8 @@ export default function FeaturedCard({
     description,
     price
 }) {
+ 
+ 
     return (
         <View style={styles.container}>
             <Image source={{ uri: imageUrl }} style={styles.image} />

@@ -1,67 +1,114 @@
-import { StyleSheet, View, ScrollView, Image, Text } from "react-native";
+import { StyleSheet, View, ScrollView, Image, Text, Alert } from "react-native";
 import Button from "../components/Button";
+import { useEffect, useState } from "react";
+import { mealApi } from "../api";
+import SizeSelector from "../components/SizeSelector.jsx";
+import { AVAILABLE_EXTRAS, calculateTotalPrice, calculateUnitPrice } from "../utils/cartUtils.js";
+import ExtrasSelector from "../components/ExtrasSelector.jsx";
+import QuantityStepper from "../components/QuantityStepper.jsx";
+import { useCart } from "../contexts/cart-context/useCartContext.js";
 
 
 export default function DetailsScreen({
     route,
     navigation,
 }) {
-    const item = route.params.item;
+    const itemId = route.params.itemId;
+    const [meal, setMeal] = useState({})
+    const [size, setSize] = useState('S')
+    const [extras, setExtras] = useState([])
+    const [qty, setQty] = useState(1);
+    const { addToCart } = useCart()
+
+    useEffect(() => {
+        mealApi.getMealById(itemId)
+            .then(data => setMeal(data[0]))
+            .catch(err => Alert.alert('Error', err.message))
+    }, [itemId])
+
+    const toggleExtra = (extra) => {
+        setExtras((prevExtras) =>
+            prevExtras.includes(extra)
+                ? prevExtras.filter((e) => e !== extra)
+                : [...prevExtras, extra]
+        )
+    };
+
+    const unitPrice = calculateUnitPrice(meal.price || 0, size, extras)
+    const totalPrice = calculateTotalPrice(meal.price || 0, size, extras, qty)
+
+    const handleAddToCart = () => {
+
+        addToCart({
+            item: meal,
+            options: {
+                size,
+                extras,
+                qty,
+            },
+            totalPrice,
+            unitPrice
+        })
+
+        Alert.alert('Added to Cart', `You have added ${qty} ${meal.name}(s) to your cart.`);
+
+        navigation.navigate('MainSatck')
+    }
 
     return (
         <View style={styles.container}>
             <ScrollView showsVerticalScrollIndicator={false}>
-                {item.imageUrl && (
+                {meal.imageUrl && (
                     <Image
-                        source={{ uri: item.imageUrl }}
+                        source={{ uri: meal.imageUrl }}
                         style={styles.image}
                         resizeMode="cover"
                     />
                 )}
 
                 <View style={styles.content}>
-                    <Text style={styles.name}>{item.name}</Text>
-                    <Text style={styles.description}>{item.description}</Text>
-                    <Text style={styles.basePrice}>Base price: ${item.price.toFixed(2)}</Text>
+                    <Text style={styles.name}>{meal.name}</Text>
+                    <Text style={styles.description}>{meal.description}</Text>
+                    <Text style={styles.basePrice}>Base price: ${meal.price?.toFixed(2)}</Text>
 
                     <View style={styles.divider} />
 
-                    {/* <SizeSelector selectedSize={size} onSelect={setSize} /> */}
+                    <SizeSelector selectedSize={size} onSelect={setSize} />
 
-                    {/* <ExtrasSelector
+                    <ExtrasSelector
                         extras={AVAILABLE_EXTRAS}
                         selectedExtras={extras}
                         onToggle={toggleExtra}
-                    /> */}
+                    />
 
                     <View style={styles.divider} />
 
                     <View style={styles.qtySection}>
                         <Text style={styles.qtyLabel}>Quantity</Text>
-                        {/* <QuantityStepper
+                        <QuantityStepper
                             qty={qty}
-                            onIncrement={() => setQty(qty + 1)}
-                            onDecrement={() => qty > 1 && setQty(qty - 1)}
-                        /> */}
+                            onIncrement={() => setQty(q => q + 1)}
+                            onDecrement={() => qty > 1 && setQty(q => q - 1)}
+                        />
                     </View>
                 </View>
             </ScrollView>
-            
+
             <View style={styles.footer}>
                 <View style={styles.priceContainer}>
                     <Text style={styles.totalLabel}>Total</Text>
-                    <Text style={styles.totalPrice}>${13.99}</Text>
+                    <Text style={styles.totalPrice}>${totalPrice?.toFixed(2)}</Text>
                 </View>
                 <View style={styles.footerButtons}>
                     <Button
                         title="Add to Cart"
-                        // onPress={handleAddToCart}
+                        onPress={handleAddToCart}
                         style={styles.addButton}
                     />
                     <Button
                         title="View Cart"
                         variant="outline"
-                        onPress={() => navigation.navigate('CartModal')}
+                        onPress={() => navigation.navigate('MainCart')}
                         style={styles.viewCartButton}
                     />
                 </View>

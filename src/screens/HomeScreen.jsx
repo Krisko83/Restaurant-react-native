@@ -1,14 +1,50 @@
-import { View, Text, StyleSheet, FlatList, ScrollView, Pressable } from "react-native";
+import { useEffect, useState } from "react";
+import { View, Text, StyleSheet, FlatList, ScrollView, Alert, RefreshControl } from "react-native";
+import { Link } from "@react-navigation/native"; 
+import { categoryApi, mealApi } from "../api";
 import CategoryCard from "../components/CategoryCard";
- 
- 
-import { Link } from "@react-navigation/native";
-import { categories, featuredItems } from "../data/data.js";
 import FeaturedCard from "../components/FeaturedCard.jsx";
 
+
 export default function HomeScreen() {
+    const [categories, setCategories] = useState([]);
+    const [refreshing, setRefreshing] = useState(false);
+    const [featuredMeals, setFeaturedMeals] = useState([]);
+ 
+    useEffect(() => {
+        categoryApi.getAll()
+            .then(setCategories)
+            .catch(err => Alert.alert('Error', err.message))
+    }, []);
+
+    useEffect(() => {
+        mealApi.getAll()
+        .then(setFeaturedMeals)
+        .catch(err => Alert.alert('Error', err.message))
+    }, []); 
+
+    const handleRefresh = async () => {
+        setRefreshing(true);
+
+        try {
+            const data = await categoryApi.getAll();
+            setCategories(data)
+
+        } catch (err) {
+            Alert.alert('Error', err.message)
+
+        } finally {
+            setRefreshing(false)
+        }
+    }
+
+    const meals = featuredMeals.slice(3 , 7)
+ 
+  
     return (
-        <ScrollView style={styles.container}>
+        <ScrollView style={styles.container}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
+        >
             <View style={styles.header}>
                 <Text style={styles.restaurantName}>Tasty Bites</Text>
                 <View style={styles.headerInfo}>
@@ -22,12 +58,12 @@ export default function HomeScreen() {
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Featured Items</Text>
                 <FlatList
-                    data={featuredItems}
+                    data={meals}
                     keyExtractor={(item) => item.id}
-                    renderItem={({ item }) => (
-                        <Link screen="Details" params={{ item }} style={{ marginRight: 12 }}>
+                    renderItem={({item}) => (
+                        <Link screen="Details" params={{ itemId: item?.id }} style={{ marginRight: 12 }}>
                             <FeaturedCard {...item} />
-                        </Link> 
+                        </Link>
 
                     )}
                     horizontal
@@ -38,8 +74,8 @@ export default function HomeScreen() {
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Categories</Text>
                 {categories.map((category) => (
-                    <Link key={category.id}  screen="Category" params={{ categoryId: category.id, categoryName: category.title }} style={{ marginBottom: 12, }}>
-                        <CategoryCard  title={category.title} />
+                    <Link key={category.id} screen="Category" params={{ categoryId: category.id, categoryName: category.title }} style={{ marginBottom: 12, }}>
+                        <CategoryCard title={category.title} />
                     </Link>
                 ))}
             </View>
